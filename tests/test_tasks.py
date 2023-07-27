@@ -4,8 +4,10 @@ from jane_watson import tasks, util
 
 
 def test_extract_text_from_subtitle():
-    path = "/Volumes/Mac/OMSCS/15___Commonsense_Reasoning_subtitles/" \
-           "400 - Example_ Ashok Ate a Frog.srt"
+    # path = "/Volumes/Mac/OMSCS/15___Commonsense_Reasoning_subtitles/" \
+    #        "400 - Example_ Ashok Ate a Frog.srt"
+    path = "/Volumes/Mac/OMSCS/09___Case_Based_Reasoning_subtitles/" \
+           "231 - Exercise_ Retrieval by Discrimin. Tree Solution.srt"
     text = tasks.extract_text_from_subtitle(path)
     util.print_limit(text)
 
@@ -38,9 +40,21 @@ def test_get_embeddings():
     print(embeddings)
 
 
-def test_ingest_module():
+def test_extract_module():
     path = '/Volumes/Mac/OMSCS/13___Planning_subtitles'
-    data = tasks.ingest_module(path, 348715, 62762)
+    data = tasks.extract_module(path, 348715, 62762)
     with Path('/tmp/planning.pkl').open('wb') as f:
         pickle.dump(data, f)
 
+
+def test_extract_course():
+    path = '/Volumes/Mac/OMSCS'
+    data = tasks.extract_course(path)
+    with Path('/tmp/kbai.pkl').open('wb') as f:
+        pickle.dump(data, f)
+
+
+def test_load():
+    with Path('/tmp/kbai.pkl').open('rb') as f:
+        data = pickle.load(f)
+    tasks.load(data)
