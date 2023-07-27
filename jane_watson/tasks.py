@@ -1,8 +1,13 @@
 from pathlib import Path
 from time import sleep
 
+import pandas as pd
+import pickle
 import openai
 from tqdm import tqdm
+from sklearn.metrics.pairwise import cosine_similarity
+from scipy.spatial.distance import cosine
+import numpy as np
 
 from jane_watson.db import kbai
 
@@ -45,7 +50,7 @@ def summarize_in_bullets(text, retries=5, sleep_between_retries=1):
                 max_tokens=256,
             )
             return response.choices[0].message.content
-        except openai.error.ServiceUnavailableError as e:
+        except Exception as e:
             sleep(sleep_between_retries)
             print(f'Retrying {i + 1} of {retries}, {str(e)}')
     raise Exception(f'Failed to summarize {text}')
@@ -134,8 +139,40 @@ def extract_course(
         )
         data += module_data
         fcid += len(module_data) + 1
+        with Path(f'/tmp/debug_kbai_{i + 1}.pkl').open('wb') as f:
+            pickle.dump(data, f)
+
     return data
 
 
 def load(data):
     kbai.insert_many(data)
+
+
+def fix_urls(
+        course_path,
+        first_class_id=348259,
+        first_module_id=62750,
+        course_id=39458
+):
+    course_path = Path(course_path)
+    modules_paths = sorted(list(course_path.glob('*___*_subtitles')))
+    data = []
+    fcid = first_class_id
+    for i, module_path in enumerate(modules_paths):
+        module_name = module_path.stem.split('___')[1] \
+            .replace('_', ' ').replace(' subtitles', '')
+        print(f'Fixing module {i + 1}: {module_name}...')
+        result = list(kbai.find({"module": module_name}))
+        assert len(result) > 0
+        print()
+
+
+def answer(query):
+    query_embeddings = np.array(get_embeddings(query))
+    results = pd.DataFrame(kbai.find({}))
+    results['embeddings'] = results['embeddings'].apply(np.array)
+    results['similarity'] = results['embeddings'].apply(lambda x: cosine(x, query_embeddings))
+
+    print(results)
+    raise NotImplementedError

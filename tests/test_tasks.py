@@ -58,3 +58,16 @@ def test_load():
     with Path('/tmp/kbai.pkl').open('rb') as f:
         data = pickle.load(f)
     tasks.load(data)
+
+
+def test_fix_urls():
+    path = '/Volumes/Mac/OMSCS'
+    data = tasks.fix_urls(path)
+    with Path('/tmp/kbai.pkl').open('wb') as f:
+        pickle.dump(data, f)
+
+
+def test_answer():
+    query = "What is Means Ends analysis?"
+    a = tasks.answer(query)
+    print(a)
