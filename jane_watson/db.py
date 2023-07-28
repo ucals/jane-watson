@@ -185,6 +185,7 @@ def answer(query, n_top=10):
     results['similarity'] = 1 - results['distance']
     results['similarity'] = results['similarity'].apply(lambda x: f'{x:.1%}')
     results = results.sort_values('distance')
+    results['class'] = results['class'].str.replace('_', ':')
 
     top = results.iloc[0]
     question = f'Class title: {top["class"]}\n\n' \
@@ -206,6 +207,6 @@ def answer(query, n_top=10):
 if __name__ == '__main__':
     path = '/Volumes/Mac/OMSCS'
     d = extract_course(path)
-    with Path('/tmp/kbai.pkl').open('wb') as f:
+    with Path('kbai.pkl').open('wb') as f:
         pickle.dump(d, f)
     load(d)

@@ -28,6 +28,7 @@ def create_app(test_config=None):
 
     data = list(kbai.find({}))
     df = pd.DataFrame(data)
+    df['class'] = df['class'].str.replace('_', ':')
     modules = df['module'].unique()
 
     # a simple page that says hello
@@ -41,7 +42,7 @@ def create_app(test_config=None):
         x = df[df['module'] == module_name]
         content = ""
         for idx, row in x.iterrows():
-            content = f"{content}## {row['class'].replace('_', ':')}\n\n{row['summary']}\n\n\n"
+            content = f"{content}## {row['class']}\n\n{row['summary']}\n\n\n"
 
         return render_template(
             'module.html',
