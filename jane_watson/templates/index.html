@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <p>Hi, I'm Jane Watson, a KBAI TA.</p>
+    <p>Ask me any question about KBAI. I'll answer the best I can, grounding
+        and referencing my answers in what was seen in class.</p>
+    <p>Additionally, if you just want to see a summary of all classes, click
+        on the module names in the left.</p>
+    <form method="get" action="{{ url_for('search') }}">
+        <label for="search">Search:</label>
+        <input type="text" id="q" name="q">
+        <button type="submit">Submit</button>
+    </form>
+
+{% endblock %}

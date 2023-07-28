@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from jane_watson.db import kbai
 from markdown import markdown
 
@@ -32,8 +32,8 @@ def create_app(test_config=None):
 
     # a simple page that says hello
     @app.route('/')
-    def main():
-        return render_template('search.html', modules=modules)
+    def index():
+        return render_template('index.html', modules=modules)
 
     @app.route('/<int:module_number>')
     def module(module_number):
@@ -48,6 +48,22 @@ def create_app(test_config=None):
             modules=modules,
             module_name=module_name,
             content=markdown(content)
+        )
+
+    @app.route('/search')
+    def search():
+        q = request.args.get('q')
+        a = db.answer(q)
+        for item in a['top_results']:
+            item['summary'] = markdown(item['summary'])
+
+        return render_template(
+            'search.html',
+            modules=modules,
+            question=q,
+            answer=a['answer'],
+            top_results=a['top_results'],
+            module_url=a['module_url']
         )
 
     return app

@@ -1,11 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <p>Hi, I'm Jane Watson, a KBAI TA.</p>
-    <p>Ask me any question about KBAI. I'll answer the best I can, grounding
-        and referencing my answers in what was seen in class.</p>
-    <p>Additionally, if you just want to see a summary of all classes, click
-        on the module names in the left.</p>
-    <p></p>
+    <h1>{{ question }}</h1>
+    <h2>{{ answer }}</h2>
+    <p><a href="{{ module_url }}" , target="_blank">Link to EdStem module</a>
+    </p>
+    <p>Top classes to watch for this question:</p>
+
+    {% for result in top_results %}
+        <h2>{{ result['class'] }} - module {{ result['module'] }} - similarity of {{ result['similarity'] }}</h2>
+        {{ result['summary'] | safe }}
+    {% endfor %}
 
 {% endblock %}

@@ -181,8 +181,10 @@ def answer(query, n_top=10):
     query_embeddings = np.array(get_embeddings(query))
     results = pd.DataFrame(kbai.find({}))
     results['embeddings'] = results['embeddings'].apply(np.array)
-    results['similarity'] = results['embeddings'].apply(lambda x: cosine(x, query_embeddings))
-    results = results.sort_values('similarity')
+    results['distance'] = results['embeddings'].apply(lambda x: cosine(x, query_embeddings))
+    results['similarity'] = 1 - results['distance']
+    results['similarity'] = results['similarity'].apply(lambda x: f'{x:.1%}')
+    results = results.sort_values('distance')
 
     top = results.iloc[0]
     question = f'Class title: {top["class"]}\n\n' \

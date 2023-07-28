@@ -12,7 +12,7 @@
     <div class="basis-1/4">
         <h1>Jane Watson</h1>
         <h2>KBAI TA</h2>
-        <p><a href="{{ url_for('main') }}">Search</a></p>
+        <p><a href="{{ url_for('index') }}">Search</a></p>
         {% for module in modules %}
             <p><a href="{{ url_for('module', module_number=loop.index) }}">{{ loop.index }}: {{ module }}</a></p>
         {% endfor %}
