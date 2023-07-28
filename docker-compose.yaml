@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  flask:
+    image: 737625137275.dkr.ecr.us-east-1.amazonaws.com/jane-flask
+    build: .
+    expose:
+      - 5000
+    volumes:
+      - shared-volume:/app/jane_watson/static
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:5000/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+
+  nginx:
+    image: 737625137275.dkr.ecr.us-east-1.amazonaws.com/jane-nginx
+    build: ./nginx
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - flask
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - shared-volume:/static
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -O /dev/null http://localhost || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+
+volumes:
+  shared-volume:
