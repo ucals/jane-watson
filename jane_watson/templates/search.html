@@ -1,15 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{{ question }}</h1>
-    <h2>{{ answer }}</h2>
-    <p><a href="{{ module_url }}" , target="_blank">Link to EdStem module</a>
+    <h1 class="text-3xl font-bold mb-8">{{ question }}</h1>
+    <h2 class="text-xl text-neutral-700 leading-8 mb-8">{{ answer }}</h2>
     </p>
-    <p>Top classes to watch for this question:</p>
+    <p class="text-xl font-bold mb-4">Top classes to watch for this question:</p>
+
 
     {% for result in top_results %}
-        <h2>{{ result['class'] }} - module {{ result['module'] }} - similarity of {{ result['similarity'] }}</h2>
-        {{ result['summary'] | safe }}
+        <h2 class="text-xl font-semibold leading-tight mt-6 text-blue-500">{{ loop.index }}. {{ result['class'] }} ({{ result['similarity'] }}) - {{ result['module'] }}</h2>
+        <div class="article">{{ result['summary'] | safe }}</div>
     {% endfor %}
+
+
 
 {% endblock %}

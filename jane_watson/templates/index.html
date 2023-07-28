@@ -1,15 +1,21 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <p>Hi, I'm Jane Watson, a KBAI TA.</p>
-    <p>Ask me any question about KBAI. I'll answer the best I can, grounding
+    <script>
+        window.addEventListener("load", (e) => {
+          const input = document.getElementById("q");
+          input.focus();
+        });
+    </script>
+
+    <p class="text-neutral-700 text-2xl mb-4">Hi, I'm Jane Watson, a KBAI TA powered by AI.</p>
+    <p class="text-neutral-700 text-2xl mb-4">Ask me any question about KBAI. I'll answer the best I can, grounding
         and referencing my answers in what was seen in class.</p>
-    <p>Additionally, if you just want to see a summary of all classes, click
-        on the module names in the left.</p>
-    <form method="get" action="{{ url_for('search') }}">
-        <label for="search">Search:</label>
-        <input type="text" id="q" name="q">
-        <button type="submit">Submit</button>
+    <p class="text-neutral-700 text-2xl mb-4">Additionally, if you just want to see a summary of all classes, click
+        on the module names on the left.</p>
+    <form method="get" action="{{ url_for('search') }}" class="mt-8">
+        <input type="text" id="q" name="q" class="rounded-md text-2xl p-2 border border-slate-300 w-3/4" value="What is Means Ends analysis?">
+        <button type="submit" class="rounded-md text-2xl p-2 border border-slate-300 bg-blue-500 text-white px-8">Ask Jane</button>
     </form>
 
 {% endblock %}

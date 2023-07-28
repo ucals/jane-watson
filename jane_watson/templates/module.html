@@ -2,9 +2,11 @@
 
 {% block content %}
 
-    <h1>{{ module_name }}</h1>
+    <h1 class="text-3xl font-bold mb-1">{{ module_name }}</h1>
+    <p class="text-sm mb-8">Reading time: {{ time_to_read }} minutes</p>
+    <div class="article">
+        {{ content |safe }}
+    </div>
 
-    <br/>
-    {{ content |safe }}
 
 {% endblock %}

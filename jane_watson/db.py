@@ -1,6 +1,3 @@
-import os
-from dotenv import load_dotenv
-from pymongo import MongoClient
 import pickle
 from pathlib import Path
 from time import sleep
@@ -8,40 +5,14 @@ from time import sleep
 import numpy as np
 import openai
 import pandas as pd
+from dotenv import load_dotenv
 from natsort import natsorted
 from scipy.spatial.distance import cosine
 from tqdm import tqdm
 
+from jane_watson.util import extract_text_from_subtitle
+
 load_dotenv()
-
-MONGODB_URI = os.getenv('MONGODB_URI')
-client = MongoClient(MONGODB_URI)
-db_ = client['jane-watson']
-kbai = db_['kbai']
-
-
-def extract_text_from_subtitle(subtitle_path):
-    with Path(subtitle_path).open('r') as f:
-        try:
-            lines = f.readlines()
-        except UnicodeDecodeError:
-            with Path(subtitle_path).open('r', encoding='latin-1') as g:
-                lines = g.readlines()
-
-        text = ""
-        i = 0
-        while i < len(lines):
-            line = lines[i].strip()
-            if line.isnumeric():
-                i += 2
-                continue
-            if line == "":
-                i += 1
-                continue
-            text += line + " "
-            i += 1
-
-    return text
 
 
 def summarize_in_bullets(text, retries=5, sleep_between_retries=1):
@@ -130,15 +101,12 @@ def extract_module(
                               f'Class summary:\n{summary}\n\n' \
                               f'Class transcript:\n{text}'
         embeddings = get_embeddings(text_for_embeddings)
-        # url = f'https://edstem.org/us/courses/{course_id}/lessons' \
-        #       f'/{module_id}/slides/{first_class_id + i}'
         data.append({
             'module': module_name,
             'class': class_name,
             'summary': summary,
             'transcript': text,
-            'embeddings': embeddings,
-            # 'url': url
+            'embeddings': embeddings
         })
     return data
 
@@ -172,19 +140,13 @@ def extract_course(
     return data
 
 
-def load(data):
-    kbai.delete_many({})
-    kbai.insert_many(data)
-
-
-def answer(query, n_top=10):
+def answer(query: str, data: pd.DataFrame, n_top: int = 10):
     query_embeddings = np.array(get_embeddings(query))
-    results = pd.DataFrame(kbai.find({}))
-    results['embeddings'] = results['embeddings'].apply(np.array)
-    results['distance'] = results['embeddings'].apply(lambda x: cosine(x, query_embeddings))
-    results['similarity'] = 1 - results['distance']
-    results['similarity'] = results['similarity'].apply(lambda x: f'{x:.1%}')
-    results = results.sort_values('distance')
+    data['embeddings'] = data['embeddings'].apply(np.array)
+    data['distance'] = data['embeddings'].apply(lambda x: cosine(x, query_embeddings))
+    data['similarity'] = 1 - data['distance']
+    data['similarity'] = data['similarity'].apply(lambda x: f'{x:.1%}')
+    results = data.sort_values('distance')
     results['class'] = results['class'].str.replace('_', ':')
 
     top = results.iloc[0]
@@ -200,7 +162,6 @@ def answer(query, n_top=10):
     return {
         'answer': get_chat_response(question),
         'top_results': results.head(n_top)[columns].to_dict('records'),
-        'module_url': top['url'].rsplit('/', 2)[0]
     }
 
 
@@ -209,4 +170,3 @@ if __name__ == '__main__':
     d = extract_course(path)
     with Path('kbai.pkl').open('wb') as f:
         pickle.dump(d, f)
-    load(d)

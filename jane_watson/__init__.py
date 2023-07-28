@@ -1,9 +1,16 @@
 import os
-import pandas as pd
+import math
+import pickle
+from pathlib import Path
 
+import pandas as pd
 from flask import Flask, render_template, request
-from jane_watson.db import kbai
 from markdown import markdown
+
+from jane_watson import db
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+cache = {}
 
 
 def create_app(test_config=None):
@@ -26,7 +33,8 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    data = list(kbai.find({}))
+    with Path(BASE_DIR/'jane_watson/kbai.pkl').open('rb') as f:
+        data = pickle.load(f)
     df = pd.DataFrame(data)
     df['class'] = df['class'].str.replace('_', ':')
     modules = df['module'].unique()
@@ -43,18 +51,26 @@ def create_app(test_config=None):
         content = ""
         for idx, row in x.iterrows():
             content = f"{content}## {row['class']}\n\n{row['summary']}\n\n\n"
+        words = content.split()
+        time_to_read = math.ceil(len(words) / 150)
 
         return render_template(
             'module.html',
             modules=modules,
             module_name=module_name,
+            time_to_read=time_to_read,
             content=markdown(content)
         )
 
     @app.route('/search')
     def search():
         q = request.args.get('q')
-        a = db.answer(q)
+        if q in cache.keys():
+            a = cache[q]
+        else:
+            a = db.answer(q, df)
+            cache[q] = a
+
         for item in a['top_results']:
             item['summary'] = markdown(item['summary'])
 
@@ -63,8 +79,7 @@ def create_app(test_config=None):
             modules=modules,
             question=q,
             answer=a['answer'],
-            top_results=a['top_results'],
-            module_url=a['module_url']
+            top_results=a['top_results']
         )
 
     return app

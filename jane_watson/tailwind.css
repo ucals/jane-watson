@@ -1,0 +1,24 @@
+/* npx tailwindcss -i ./jane_watson/tailwind.css -o ./jane_watson/static/style.css --watch */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .h-screen-fix {
+        height: 100dvh;
+    }
+
+    .article h2 {
+        @apply text-2xl font-semibold leading-tight mt-6 mb-2 text-blue-500;
+    }
+    .article ul {
+        @apply text-lg leading-8 font-normal text-neutral-700 pt-3 list-disc ml-5 marker:text-slate-300;
+    }
+
+    .article ol {
+        @apply text-lg leading-8 font-normal text-neutral-700 pt-3 list-decimal ml-5 marker:text-slate-400;
+    }
+    li {
+        @apply my-1 list-outside;
+    }
+}
